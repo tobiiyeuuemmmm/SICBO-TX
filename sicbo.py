@@ -17,6 +17,17 @@ TELEGRAM_LINK = "https://t.me/TxToolAkp"
 KEY_URL = "https://raw.githubusercontent.com/tobiiyeuuemmmm/SICBO-TX/main/key.txt"
 LOCAL_KEY_FILE = "key.txt"  # Lưu key đã nhập vào file
 
+# Hiển thị banner tool
+def print_banner():
+    os.system("clear")
+    print(CYAN + "╔════════════════════════════════════╗")
+    print("║         TOOL SICBO PREDICT         ║")
+    print("╠════════════════════════════════════╣")
+    print("║ 🔑 Chủ Sở Hữu: @Sg205Rika          ║")
+    print("║ 🔗 Link kênh:                      ║")
+    print("║   https://t.me/TxToolAkp           ║")
+    print("╚════════════════════════════════════╝" + RESET)
+
 # Tải danh sách key từ GitHub
 def get_valid_keys():
     try:
@@ -86,17 +97,6 @@ def predict_sicbo(md5_key):
     storm_chance = random.uniform(0, 10)
 
     return result, probability, xor_result, round(storm_chance, 2)
-
-# Hiển thị banner tool
-def print_banner():
-    os.system("clear")
-    print(CYAN + "╔════════════════════════════════════╗")
-    print("║         TOOL SICBO PREDICT         ║")
-    print("╠════════════════════════════════════╣")
-    print("║ 🔑 Chủ Sở Hữu: @Sg205Rika          ║")
-    print("║ 🔗 Link kênh:                      ║")
-    print("║   https://t.me/TxToolAkp           ║")
-    print("╚════════════════════════════════════╝" + RESET)
 
 # Chạy tool
 def main():
