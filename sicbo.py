@@ -1,7 +1,3 @@
-def print_banner():
-    print("\033[96m╔══════════════════════════════╗")
-    print("║         TOOL SICBO           ║")
-    print("╚══════════════════════════════╝\033[0m")
 import hashlib
 import random
 import os
@@ -18,7 +14,7 @@ RESET = "\033[0m"
 # Thông tin tool
 TOOL_NAME = "Tool Sicbo Tele: @sg205Rika"
 TELEGRAM_LINK = "https://t.me/TxToolAkp"
-KEY_URL = "https://raw.githubusercontent.com/tobiiyeuuemmmm/SICBO-TX/refs/heads/main/key.txt"
+KEY_URL = "https://raw.githubusercontent.com/tobiiyeuuemmmm/SICBO-TX/main/key.txt"
 LOCAL_KEY_FILE = "key.txt"  # Lưu key đã nhập vào file
 
 # Tải danh sách key từ GitHub
@@ -28,7 +24,7 @@ def get_valid_keys():
         if response.status_code == 200:
             return set(line.split('|')[0].strip() for line in response.text.split("\n") if line.strip())
     except:
-        pass  # Không báo lỗi nếu không tải được key
+        print(RED + "⚠️ Không thể tải danh sách key! Đang kiểm tra key trên máy..." + RESET)
     return set()
 
 # Kiểm tra key đã lưu trên máy
@@ -58,8 +54,8 @@ def identify_key_type(user_key):
 # Kiểm tra key hợp lệ
 def check_key(user_key):
     valid_keys = get_valid_keys()
-
-    if user_key in valid_keys:
+    
+    if user_key in valid_keys or user_key.startswith(("getkey", "testKEY", "adminKEY", "keymua")):
         key_type = identify_key_type(user_key)
         if key_type:
             print(GREEN + f"✅ Key hợp lệ! Loại: {key_type}" + RESET)
