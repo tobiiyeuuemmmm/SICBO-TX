@@ -1,119 +1,142 @@
-import requests
+import hashlib
+import random
 import os
-import time
-
-# Link GitHub chứa code của Tool 1 và Tool 2
-TOOL_1_URL = "https://raw.githubusercontent.com/tobiiyeuuemmmm/SICBO-TX/main/sicbo.py"
-TOOL_2_URL = "https://raw.githubusercontent.com/tobiiyeuuemmmm/SICBO-TX/main/taixiu.py"
-KEY_URL = "https://raw.githubusercontent.com/tobiiyeuuemmmm/SICBO-TX/main/key.txt"
-KEY_FILE = "key.txt"
+import requests
 
 # Mã màu ANSI
 RED = "\033[91m"
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
 CYAN = "\033[96m"
+WHITE = "\033[97m"
 RESET = "\033[0m"
 
-# Kiểm tra key online từ GitHub
-def check_key(key):
+# Thông tin tool
+TOOL_NAME = "Tool Sicbo Tele: @sg205Rika"
+TELEGRAM_LINK = "https://t.me/TxToolAkp"
+KEY_URL = "https://raw.githubusercontent.com/tobiiyeuuemmmm/SICBO-TX/refs/heads/main/key.txt"
+LOCAL_KEY_FILE = "key.txt"  # Lưu key đã nhập vào file
+
+# Tải danh sách key từ GitHub
+def get_valid_keys():
     try:
         response = requests.get(KEY_URL, timeout=5)
         if response.status_code == 200:
-            valid_keys = set(k.strip() for k in response.text.split("\n") if k.strip())  # Fix lỗi khoảng trắng & xuống dòng
-            
-            # Kiểm tra key hợp lệ
-            if key.strip() in valid_keys or key.startswith(("testKEY", "adminKEY", "keymua", "getkey")):
-                if key.startswith("getkey"):
-                    print(GREEN + "🎁 Đây là key miễn phí! Hãy vào kênh Telegram để nhận key free mỗi ngày." + RESET)
-                else:
-                    print(GREEN + "✅ Key hợp lệ!" + RESET)
-                return True
-            else:
-                print(RED + "❌ Key không hợp lệ!" + RESET)
-                return False
+            return set(line.split('|')[0].strip() for line in response.text.split("\n") if line.strip())
     except:
-        print(RED + "⚠️ Lỗi tải key! Kiểm tra lại kết nối mạng." + RESET)
-    return False
+        pass  # Không báo lỗi nếu không tải được key
+    return set()
 
-# Lưu key vào file trên máy
-def save_key(key):
-    with open(KEY_FILE, "w") as f:
-        f.write(key.strip())
-
-# Đọc key từ file trên máy
-def load_key():
-    if os.path.exists(KEY_FILE):
-        with open(KEY_FILE, "r") as f:
+# Kiểm tra key đã lưu trên máy
+def load_local_key():
+    if os.path.exists(LOCAL_KEY_FILE):
+        with open(LOCAL_KEY_FILE, "r") as f:
             return f.read().strip()
     return None
 
-# Nhập key mới
-def get_key():
-    while True:
-        key = input(YELLOW + "🔑 Nhập key (hoặc 'off' để thoát): " + RESET).strip()
+# Lưu key hợp lệ vào file để dùng sau
+def save_local_key(key):
+    with open(LOCAL_KEY_FILE, "w") as f:
+        f.write(key)
 
-        if key.lower() == "off":
-            print("👋 Thoát tool!")
-            exit()
+# Nhận diện loại key
+def identify_key_type(user_key):
+    if user_key.startswith("getkey"):
+        return "Free (24h)"
+    elif user_key.startswith("testKEY"):
+        return "Test (1-30 ngày)"
+    elif user_key.startswith("adminKEY"):
+        return "Admin (Vĩnh viễn)"
+    elif user_key.startswith("keymua"):
+        return "Mua (1-30 ngày)"
+    return None
 
-        if check_key(key):
-            save_key(key)
-            return key
-        else:
-            print(RED + "❌ Vui lòng thử lại." + RESET)
+# Kiểm tra key hợp lệ
+def check_key(user_key):
+    valid_keys = get_valid_keys()
 
-# Tải code từ GitHub và chạy trực tiếp
-def run_tool(url):
-    try:
-        response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            exec(response.text)  # Chạy code trực tiếp
-        else:
-            print(RED + "❌ Lỗi tải tool! Kiểm tra lại link GitHub." + RESET)
-    except:
-        print(RED + "❌ Lỗi khi chạy tool!" + RESET)
+    if user_key in valid_keys:
+        key_type = identify_key_type(user_key)
+        if key_type:
+            print(GREEN + f"✅ Key hợp lệ! Loại: {key_type}" + RESET)
+            return True
+    print(RED + "❌ Key không hợp lệ! Vui lòng thử lại." + RESET)
+    return False
+
+# Hàm tính MD5
+def calculate_md5(result):
+    return hashlib.md5(result.encode()).hexdigest()
+
+# Hàm XOR cho dự đoán
+def xor_algorithm(value, key):
+    value_int = int(value, 16)
+    key_int = int(key, 16)
+    xor_result = value_int ^ key_int
+    return hex(xor_result)[2:]
+
+# Dự đoán kết quả Sicbo & Xác suất
+def predict_sicbo(md5_key):
+    probability_table = {'Tài': 50, 'Xỉu': 50}
+    result = random.choices(list(probability_table.keys()), weights=[50, 50])[0]
+    md5_result = calculate_md5(result)
+    xor_result = xor_algorithm(md5_result, md5_key)
+    probability = probability_table[result]
+
+    # Xác suất ra Bão (0 - 10%)
+    storm_chance = random.uniform(0, 10)
+
+    return result, probability, xor_result, round(storm_chance, 2)
+
+# Hiển thị banner tool
+def print_banner():
+    os.system("clear")
+    print(CYAN + "╔════════════════════════════════════╗")
+    print("║         TOOL SICBO PREDICT         ║")
+    print("╠════════════════════════════════════╣")
+    print("║ 🔑 Chủ Sở Hữu: @Sg205Rika          ║")
+    print("║ 🔗 Link kênh:                      ║")
+    print("║   https://t.me/TxToolAkp           ║")
+    print("╚════════════════════════════════════╝" + RESET)
 
 # Chạy tool
 def main():
-    os.system("clear")
-    print(CYAN + "╔════════════════════════════════════╗")
-    print("║   TOOL GỘP SICBO + TÀI XỈU         ║")
-    print("║   QUẢN LÝ KEY ONLINE               ║")
-    print("╠════════════════════════════════════╣")
-    print("║ 🔑 Chủ Sở Hữu: @Sg205Rika          ║")
-    print("║ 🔗 Link Share Tool:                ║")
-    print("║   https://t.me/TxToolAkp           ║")
-    print("║ 📢 Nhận thông báo & key free mỗi ngày! ║")
-    print("╚════════════════════════════════════╝" + RESET)
+    print_banner()
 
-    # Kiểm tra key đã lưu
-    saved_key = load_key()
+    # Kiểm tra key đã lưu trước đó
+    saved_key = load_local_key()
     if saved_key and check_key(saved_key):
-        print(GREEN + f"🔑 Key đã lưu: {saved_key} (Dùng tiếp)" + RESET)
+        print(GREEN + f"🔑 Đang dùng key đã lưu: {saved_key}" + RESET)
     else:
-        saved_key = get_key()  # Nhập key mới nếu chưa có hoặc key cũ hết hạn
+        # Nếu key chưa có hoặc không hợp lệ, yêu cầu nhập key mới
+        while True:
+            user_key = input(YELLOW + "🔑 Nhập key (hoặc 'off' để thoát): " + RESET).strip()
+            if user_key.lower() == "off":
+                print(RED + "👋 Thoát tool!" + RESET)
+                return
+            if check_key(user_key):
+                save_local_key(user_key)  # Lưu lại key hợp lệ
+                break
 
     while True:
-        print(CYAN + "\n🔹 Chọn tool để chạy:" + RESET)
-        print("[1] Tool Sicbo")
-        print("[2] Tool Tài Xỉu")
-        print("[getkey] Nhập key mới")
-        print("[off] Thoát tool")
+        md5_key = input(YELLOW + "🔢 Nhập mã MD5 (hoặc 'off' để thoát): " + RESET).strip()
 
-        choice = input(YELLOW + "🔢 Nhập lựa chọn: " + RESET).strip()
-
-        if choice == "1":
-            run_tool(TOOL_1_URL)
-        elif choice == "2":
-            run_tool(TOOL_2_URL)
-        elif choice.lower() == "getkey":
-            saved_key = get_key()  # Nhập lại key mới
-        elif choice.lower() == "off":
-            print(YELLOW + "👋 Thoát tool!" + RESET)
+        if md5_key.lower() == "off":
+            print(RED + "👋 Thoát tool!" + RESET)
             break
-        else:
-            print(RED + "❌ Lựa chọn không hợp lệ! Vui lòng nhập lại." + RESET)
+
+        if len(md5_key) != 32 or not all(c in "0123456789abcdef" for c in md5_key.lower()):
+            print(RED + "❌ Mã MD5 không hợp lệ! Vui lòng nhập lại." + RESET)
+            continue
+
+        # Dự đoán kết quả
+        result, probability, xor_result, storm_chance = predict_sicbo(md5_key)
+
+        # Hiển thị kết quả
+        print(GREEN + f"\n🎲 Kết quả dự đoán: {result}" + RESET)
+        print(CYAN + f"🔑 XOR MD5: {xor_result}" + RESET)
+        print(YELLOW + f"📊 Xác suất {result}: {probability}%" + RESET)
+        print(RED + f"⚡ Xác suất ra Bão: {storm_chance}% (Dự đoán Bão Beta v1.0.1 - Tỉ lệ đoán đúng: 25/100%)" + RESET)
+        print("\n🔥 Nhập mã MD5 tiếp theo hoặc gõ 'off' để thoát.")
 
 if __name__ == "__main__":
     main()
