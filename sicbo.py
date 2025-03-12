@@ -12,7 +12,7 @@ WHITE = "\033[97m"
 RESET = "\033[0m"
 
 # Thông tin tool
-TOOL_NAME = "Tool Sicbo Tele: @Sg205Rika"
+TOOL_NAME = "Tool Sicbo Tele: @sg205Rika"
 TELEGRAM_LINK = "https://t.me/TxToolAkp"
 KEY_URL = "https://raw.githubusercontent.com/tobiiyeuuemmmm/SICBO-TX/main/key.txt"
 LOCAL_KEY_FILE = "key.txt"
