@@ -12,14 +12,14 @@ WHITE = "\033[97m"
 RESET = "\033[0m"
 
 # Thông tin tool
-TOOL_NAME = "Tool Sicbo Tele: @sg205Rika"
+TOOL_NAME = "Tool Sicbo Tele: @Sg205Rika"
 TELEGRAM_LINK = "https://t.me/TxToolAkp"
 KEY_URL = "https://raw.githubusercontent.com/tobiiyeuuemmmm/SICBO-TX/main/key.txt"
 LOCAL_KEY_FILE = "key.txt"  # Lưu key đã nhập vào file
 
 # Hiển thị banner tool
 def print_banner():
-    os.system("clear")
+    os.system("clear || cls")  # Hỗ trợ cả Termux và Windows
     print(CYAN + "╔════════════════════════════════════╗")
     print("║         TOOL SICBO PREDICT         ║")
     print("╠════════════════════════════════════╣")
@@ -31,7 +31,7 @@ def print_banner():
 # Tải danh sách key từ GitHub
 def get_valid_keys():
     try:
-        response = requests.get(KEY_URL, timeout=5)
+        response = requests.get(KEY_URL, timeout=10)  # Tăng timeout lên 10 giây
         if response.status_code == 200:
             return set(line.split('|')[0].strip() for line in response.text.split("\n") if line.strip())
     except:
