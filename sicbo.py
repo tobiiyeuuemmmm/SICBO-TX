@@ -1,3 +1,7 @@
+def print_banner():
+    print("\033[96m╔══════════════════════════════╗")
+    print("║         TOOL SICBO           ║")
+    print("╚══════════════════════════════╝\033[0m")
 import hashlib
 import random
 import os
